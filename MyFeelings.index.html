@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>my people, my problems.</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101014;color:#f5f5fa;
+font-family:system-ui,sans-serif;padding:22px;max-width:700px;
+margin:auto}
+h1{font-size:32px;margin-bottom:5px}
+.sub{color:#9999aa;margin-bottom:24px}
+.card{background:#1b1b23;border:1px solid #30303a;
+border-radius:18px;padding:17px;margin:14px 0}
+.top{display:flex;justify-content:space-between;gap:8px}
+h2{font-size:20px;margin:0 0 12px}
+label{display:block;color:#c4c4d1;font-size:13px;margin-top:14px}
+input[type=range]{width:100%;accent-color:#d879f9}
+.line{display:flex;justify-content:space-between;gap:10px}
+.num{font-weight:700;color:#e879f9}
+button{background:#292933;color:white;border:1px solid #444452;
+border-radius:12px;padding:12px;font-size:15px;cursor:pointer}
+.add{width:100%;background:#d879f9;color:#17121b;
+font-weight:700;margin:12px 0}
+small{color:#9292a2}
+</style>
+</head>
+<body>
+<h1>my people, my problems. 🖤</h1>
+<div class="sub">MY FEELINGS DASHBOARD · 100% DRAMA</div>
+<div id="people"></div>
+<button class="add" onclick="addPerson()">＋ Add a person</button>
+<small>Personal feelings tracker · main character energy</small>
+
+<script>
+const feelings = [
+ ["Crush","🫶"],["Needing them","🥹"],["Missing them","💔"],
+ ["Angry","💢"],["Jealous","👀"],["Obsessed","🫠"],
+ ["Love","❤️"],["Trust","🤝"],["Annoyed","🙄"],
+ ["Friendship","💗"],["Disappointed","🥲"],["Over them","🧊"],
+ ["Polish","💅"]
+];
+
+let people = JSON.parse(localStorage.getItem("myFeelings") || "null") || [
+ {name:"Person 1",values:[80,65,40,10,30,70,50,60,15,75,20,5,90]},
+ {name:"Person 2",values:[20,35,60,85,50,15,30,20,90,40,80,25,45]}
+];
+
+function save(){
+ localStorage.setItem("myFeelings",JSON.stringify(people));
+}
+function render(){
+ const root=document.getElementById("people");
+ root.innerHTML="";
+ people.forEach((p,i)=>{
+  const card=document.createElement("section");
+  card.className="card";
+  const top=document.createElement("div");
+  top.className="top";
+  const title=document.createElement("h2");
+  title.textContent="🖤 "+p.name;
+  const rename=document.createElement("button");
+  rename.textContent="✎";
+  rename.setAttribute("aria-label","Rename person");
+  rename.onclick=()=>{
+   const n=prompt("Person's name:",p.name);
+   if(n&&n.trim()){p.name=n.trim();save();render();}
+  };
+  top.append(title,rename);
+  card.append(top);
+  feelings.forEach(([name,emoji],j)=>{
+   const line=document.createElement("div");
+   line.className="line";
+   const label=document.createElement("label");
+   label.textContent=emoji+" "+name;
+   label.style.marginTop="12px";
+   const num=document.createElement("span");
+   num.className="num";
+   num.textContent=(p.values[j]||0)+"%";
+   line.append(label,num);
+   const slider=document.createElement("input");
+   slider.type="range";slider.min=0;slider.max=100;
+   slider.value=p.values[j]||0;
+   slider.setAttribute("aria-label",name+" for "+p.name);
+   slider.oninput=()=>{
+    p.values[j]=Number(slider.value);
+    num.textContent=slider.value+"%";
+    save();
+   };
+   card.append(line,slider);
+  });
+  const remove=document.createElement("button");
+  remove.textContent="Remove person";
+  remove.style.marginTop="18px";
+  remove.onclick=()=>{
+   if(confirm("Remove "+p.name+"?")){
+    people.splice(i,1);save();render();
+   }
+  };
+  card.append(remove);
+  root.append(card);
+ });
+}
+function addPerson(){
+ const name=prompt("What's their name?");
+ if(!name||!name.trim())return;
+ people.push({name:name.trim(),values:Array(feelings.length).fill(0)});
+ save();render();
+}
+render();
+</script>
+</body>
+</html>
